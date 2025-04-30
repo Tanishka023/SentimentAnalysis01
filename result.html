@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Analysis Result</title>
+</head>
+<body>
+    <h1>Sentiment: {{ sentiment }}</h1>
+    <h2>Emotion Counts:</h2>
+    <ul>
+        {% for emotion, count in emotions.items() %}
+            <li>{{ emotion }}: {{ count }}</li>
+        {% endfor %}
+    </ul>
+    <img src="{{ url_for('static', filename=graph) }}" alt="Emotion Chart">
+</body>
+</html>

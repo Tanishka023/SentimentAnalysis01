@@ -32,6 +32,9 @@ def download_nltk_resources():
 # Call the download function
 download_nltk_resources()
 
+# Additional manual download to fix potential missing punkt tokenizer
+nltk.download('punkt')
+
 # Load stopwords once
 stop_words = set(stopwords.words('english'))
 

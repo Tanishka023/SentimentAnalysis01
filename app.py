@@ -32,13 +32,13 @@ def download_nltk_resources():
 # Call the download function
 download_nltk_resources()
 
+# Load stopwords once
+stop_words = set(stopwords.words('english'))
+
 def process_text(text):
     lower_case = text.lower()
     cleaned_text = lower_case.translate(str.maketrans('', '', string.punctuation))
-    tokenized_words = word_tokenize(cleaned_text, "english")
-    
-    # Load stopwords once
-    stop_words = set(stopwords.words('english'))
+    tokenized_words = word_tokenize(cleaned_text)  # No need for "english" parameter
     
     final_words = [word for word in tokenized_words if word not in stop_words]
     lemma_words = [WordNetLemmatizer().lemmatize(word) for word in final_words]

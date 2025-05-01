@@ -1,18 +1,9 @@
-import nltk
-nltk.download('punkt')  # Ensure NLTK punkt tokenizer is downloaded
-
-# other imports
 import streamlit as st
-import matplotlib.pyplot as plt
-from nltk.tokenize import word_tokenize
-from nltk.corpus import stopwords
-from nltk.stem import WordNetLemmatizer
-from nltk.sentiment import SentimentIntensityAnalyzer
-from collections import Counter
 import string
-
-# Your existing code continues here
-
+from collections import Counter
+import matplotlib.pyplot as plt
+import nltk
+import os
 
 from nltk.corpus import stopwords
 from nltk.sentiment.vader import SentimentIntensityAnalyzer
@@ -21,28 +12,22 @@ from nltk.tokenize import word_tokenize
 
 # Check and download NLTK resources if they aren't already downloaded
 def download_nltk_resources():
-    try:
-        nltk.data.find('tokenizers/punkt')
-    except LookupError:
-        nltk.download('punkt')
-    try:
-        nltk.data.find('corpora/stopwords')
-    except LookupError:
-        nltk.download('stopwords')
-    try:
-        nltk.data.find('corpora/wordnet')
-    except LookupError:
-        nltk.download('wordnet')
-    try:
-        nltk.data.find('vader_lexicon')
-    except LookupError:
-        nltk.download('vader_lexicon')
+    resources = [
+        'tokenizers/punkt',
+        'corpora/stopwords',
+        'corpora/wordnet',
+        'vader_lexicon'
+    ]
+    
+    for resource in resources:
+        try:
+            nltk.data.find(resource)
+        except LookupError:
+            st.write(f"Downloading NLTK resource: {resource}")
+            nltk.download(resource)
 
 # Call the download function
 download_nltk_resources()
-
-# Additional manual download to fix potential missing punkt tokenizer
-nltk.download('punkt')
 
 # Load stopwords once
 stop_words = set(stopwords.words('english'))

@@ -1,9 +1,18 @@
-import streamlit as st
-import string
-from collections import Counter
-import matplotlib.pyplot as plt
 import nltk
-import os
+nltk.download('punkt')  # Ensure NLTK punkt tokenizer is downloaded
+
+# other imports
+import streamlit as st
+import matplotlib.pyplot as plt
+from nltk.tokenize import word_tokenize
+from nltk.corpus import stopwords
+from nltk.stem import WordNetLemmatizer
+from nltk.sentiment import SentimentIntensityAnalyzer
+from collections import Counter
+import string
+
+# Your existing code continues here
+
 
 from nltk.corpus import stopwords
 from nltk.sentiment.vader import SentimentIntensityAnalyzer

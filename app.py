@@ -10,28 +10,50 @@ from nltk.sentiment.vader import SentimentIntensityAnalyzer
 from nltk.stem import WordNetLemmatizer
 from nltk.tokenize import word_tokenize
 
-# Download required NLTK resources
-nltk.download('punkt')
-nltk.download('stopwords')
-nltk.download('wordnet')
-nltk.download('vader_lexicon')
+# Check and download NLTK resources if they aren't already downloaded
+def download_nltk_resources():
+    try:
+        nltk.data.find('tokenizers/punkt')
+    except LookupError:
+        nltk.download('punkt')
+    try:
+        nltk.data.find('corpora/stopwords')
+    except LookupError:
+        nltk.download('stopwords')
+    try:
+        nltk.data.find('corpora/wordnet')
+    except LookupError:
+        nltk.download('wordnet')
+    try:
+        nltk.data.find('vader_lexicon')
+    except LookupError:
+        nltk.download('vader_lexicon')
+
+# Call the download function
+download_nltk_resources()
 
 def process_text(text):
     lower_case = text.lower()
     cleaned_text = lower_case.translate(str.maketrans('', '', string.punctuation))
     tokenized_words = word_tokenize(cleaned_text, "english")
-    final_words = [word for word in tokenized_words if word not in stopwords.words('english')]
+    
+    # Load stopwords once
+    stop_words = set(stopwords.words('english'))
+    
+    final_words = [word for word in tokenized_words if word not in stop_words]
     lemma_words = [WordNetLemmatizer().lemmatize(word) for word in final_words]
 
     # Extract emotions
     emotion_list = []
-    with open('emotions.txt', 'r') as file:
-        for line in file:
-            clean_line = line.replace("\n", '').replace(",", '').replace("'", '').strip()
-            word, emotion = clean_line.split(':')
-
-            if word in lemma_words:
-                emotion_list.append(emotion)
+    if os.path.exists('emotions.txt'):  # Ensure the file exists before opening it
+        with open('emotions.txt', 'r') as file:
+            for line in file:
+                clean_line = line.replace("\n", '').replace(",", '').replace("'", '').strip()
+                word, emotion = clean_line.split(':')
+                if word in lemma_words:
+                    emotion_list.append(emotion)
+    else:
+        st.error("Emotions file not found!")
 
     emotion_counter = Counter(emotion_list)
 

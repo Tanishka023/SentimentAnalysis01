@@ -14,8 +14,11 @@ from nltk.tokenize import word_tokenize
 import matplotlib
 matplotlib.use('Agg')
 
-# Load pre-downloaded NLTK resources from your venv
-nltk.data.path.append(os.path.join(os.path.dirname(__file__), 'venv', '.venv', 'nltk_data'))
+# ✅ DOWNLOAD required NLTK data dynamically (Streamlit Cloud compatible)
+nltk.download('stopwords')
+nltk.download('punkt')
+nltk.download('vader_lexicon')
+nltk.download('wordnet')
 
 # Load stopwords once
 stop_words = set(stopwords.words('english'))
@@ -37,7 +40,7 @@ def process_text(text):
         # Extract emotions
         file_path = os.path.join(os.path.dirname(__file__), 'emotions.txt')
         emotion_list = []
-        if os.path.exists(file_path):  # Ensure the file exists before opening it
+        if os.path.exists(file_path):
             with open(file_path, 'r') as file:
                 for line in file:
                     clean_line = line.replace("\n", '').replace(",", '').replace("'", '').strip()
@@ -45,7 +48,7 @@ def process_text(text):
                     if word in lemma_words:
                         emotion_list.append(emotion)
         else:
-            st.error("Emotions file not found!")
+            st.error("emotions.txt file not found!")
             return None, None
 
         emotion_counter = Counter(emotion_list)
@@ -72,10 +75,9 @@ uploaded_file = st.file_uploader("Upload a .txt file", type=["txt"])
 
 if uploaded_file is not None:
     try:
-        # Handle file encoding issues
         text = uploaded_file.read().decode("utf-8")
     except UnicodeDecodeError:
-        st.error("Unable to decode the uploaded file. Please ensure it is a valid UTF-8 encoded text file.")
+        st.error("Please upload a UTF-8 encoded text file.")
         text = ""
 
     if text:
@@ -88,7 +90,7 @@ if uploaded_file is not None:
             st.subheader("Emotions Detected:")
             st.write(dict(emotions))
 
-            # Plotting the emotions
+            # Plotting
             fig, ax = plt.subplots()
             ax.bar(emotions.keys(), emotions.values())
             plt.xticks(rotation=45)

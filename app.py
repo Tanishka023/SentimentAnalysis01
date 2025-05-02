@@ -10,18 +10,15 @@ from nltk.sentiment.vader import SentimentIntensityAnalyzer
 from nltk.stem import WordNetLemmatizer
 from nltk.tokenize import word_tokenize
 
-
 # Explicitly set the matplotlib backend for Streamlit
 import matplotlib
 matplotlib.use('Agg')
 
-
-# Load pre-downloaded NLTK resources
-nltk.data.path.append(os.path.join(os.path.dirname(__file__), 'nltk_data'))
+# Load pre-downloaded NLTK resources from your venv
+nltk.data.path.append(os.path.join(os.path.dirname(__file__), 'venv', '.venv', 'nltk_data'))
 
 # Load stopwords once
 stop_words = set(stopwords.words('english'))
-
 
 # Function to process text
 def process_text(text):
@@ -92,8 +89,7 @@ if uploaded_file is not None:
             st.write(dict(emotions))
 
             # Plotting the emotions
-            if emotions:
-                fig, ax = plt.subplots()
-                ax.bar(emotions.keys(), emotions.values())
-                plt.xticks(rotation=45)
-                st.pyplot(fig)
+            fig, ax = plt.subplots()
+            ax.bar(emotions.keys(), emotions.values())
+            plt.xticks(rotation=45)
+            st.pyplot(fig)

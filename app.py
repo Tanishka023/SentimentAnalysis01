@@ -54,7 +54,10 @@ def download_nltk_resources():
 download_nltk_resources()
 
 # Load stopwords once
-stop_words = set(stopwords.words('english'))
+try:
+    stop_words = set(stopwords.words('english'))
+except LookupError:
+    st.error("Failed to load NLTK stopwords. Ensure the stopwords resource is downloaded.")
 
 # Function to process text
 def process_text(text):
@@ -134,6 +137,9 @@ if uploaded_file is not None:
             # Plotting the emotions
             if emotions:
                 fig, ax = plt.subplots()
-                ax.bar(emotions.keys(), emotions.values())
+                ax.bar(emotions.keys(), emotions.values(), color='skyblue')
                 plt.xticks(rotation=45, ha='right')
+                plt.title("Emotion Distribution")
+                plt.xlabel("Emotions")
+                plt.ylabel("Count")
                 st.pyplot(fig)

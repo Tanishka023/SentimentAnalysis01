@@ -24,11 +24,30 @@ if not os.path.exists(nltk_data_dir):
 # Set NLTK data path
 nltk.data.path.append(nltk_data_dir)
 
-# Download necessary NLTK data
-nltk.download('punkt', download_dir=nltk_data_dir)
-nltk.download('stopwords', download_dir=nltk_data_dir)
-nltk.download('vader_lexicon', download_dir=nltk_data_dir)
-nltk.download('wordnet', download_dir=nltk_data_dir)
+# Ensure the necessary NLTK resources are downloaded
+try:
+    # Check if the punkt tokenizer is downloaded
+    nltk.data.find('tokenizers/punkt')
+except LookupError:
+    nltk.download('punkt', download_dir=nltk_data_dir)
+
+try:
+    # Check if stopwords are downloaded
+    nltk.data.find('corpora/stopwords')
+except LookupError:
+    nltk.download('stopwords', download_dir=nltk_data_dir)
+
+try:
+    # Check if vader lexicon is downloaded
+    nltk.data.find('vader_lexicon')
+except LookupError:
+    nltk.download('vader_lexicon', download_dir=nltk_data_dir)
+
+try:
+    # Check if wordnet is downloaded
+    nltk.data.find('corpora/wordnet')
+except LookupError:
+    nltk.download('wordnet', download_dir=nltk_data_dir)
 
 # Load stopwords once
 stop_words = set(stopwords.words('english'))

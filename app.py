@@ -14,11 +14,21 @@ from nltk.tokenize import word_tokenize
 import matplotlib
 matplotlib.use('Agg')
 
-# ✅ DOWNLOAD required NLTK data dynamically (Streamlit Cloud compatible)
-nltk.download('stopwords')
-nltk.download('punkt')
-nltk.download('vader_lexicon')
-nltk.download('wordnet')
+# Custom NLTK data directory for compatibility with Streamlit Cloud or other environments
+nltk_data_dir = os.path.join(os.getcwd(), "nltk_data")
+
+# Create the directory if it doesn't exist
+if not os.path.exists(nltk_data_dir):
+    os.makedirs(nltk_data_dir)
+
+# Set NLTK data path
+nltk.data.path.append(nltk_data_dir)
+
+# Download necessary NLTK data
+nltk.download('punkt', download_dir=nltk_data_dir)
+nltk.download('stopwords', download_dir=nltk_data_dir)
+nltk.download('vader_lexicon', download_dir=nltk_data_dir)
+nltk.download('wordnet', download_dir=nltk_data_dir)
 
 # Load stopwords once
 stop_words = set(stopwords.words('english'))
@@ -34,10 +44,11 @@ def process_text(text):
         tokenized_words = word_tokenize(cleaned_text)
 
         # Remove stopwords and lemmatize words
+        lemmatizer = WordNetLemmatizer()
         final_words = [word for word in tokenized_words if word not in stop_words]
-        lemma_words = [WordNetLemmatizer().lemmatize(word) for word in final_words]
+        lemma_words = [lemmatizer.lemmatize(word) for word in final_words]
 
-        # Extract emotions
+        # Extract emotions from emotions.txt file
         file_path = os.path.join(os.path.dirname(__file__), 'emotions.txt')
         emotion_list = []
         if os.path.exists(file_path):
@@ -51,6 +62,7 @@ def process_text(text):
             st.error("emotions.txt file not found!")
             return None, None
 
+        # Count emotion occurrences
         emotion_counter = Counter(emotion_list)
 
         # Sentiment analysis
@@ -71,18 +83,24 @@ def process_text(text):
 
 # Streamlit UI
 st.title("Text Emotion & Sentiment Analyzer")
+
+# File uploader for text file
 uploaded_file = st.file_uploader("Upload a .txt file", type=["txt"])
 
+# If a file is uploaded, process it
 if uploaded_file is not None:
     try:
+        # Read and decode the uploaded file
         text = uploaded_file.read().decode("utf-8")
     except UnicodeDecodeError:
         st.error("Please upload a UTF-8 encoded text file.")
         text = ""
 
     if text:
+        # Process the uploaded text
         emotions, sentiment = process_text(text)
 
+        # If the emotions and sentiment are successfully processed
         if emotions and sentiment:
             st.subheader("Sentiment:")
             st.write(sentiment)
@@ -90,8 +108,9 @@ if uploaded_file is not None:
             st.subheader("Emotions Detected:")
             st.write(dict(emotions))
 
-            # Plotting
-            fig, ax = plt.subplots()
-            ax.bar(emotions.keys(), emotions.values())
-            plt.xticks(rotation=45)
-            st.pyplot(fig)
+            # Plotting the emotions
+            if emotions:
+                fig, ax = plt.subplots()
+                ax.bar(emotions.keys(), emotions.values())
+                plt.xticks(rotation=45, ha='right')
+                st.pyplot(fig)

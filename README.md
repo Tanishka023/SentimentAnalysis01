@@ -53,11 +53,6 @@ It is particularly useful for analyzing customer reviews, social media posts, pe
    - Display emotions as a bar chart using Matplotlib
    - Output sentiment as text summary in the Streamlit UI
 
----
-
-
-
----
 
 ## 🚀 Installation & Running
 

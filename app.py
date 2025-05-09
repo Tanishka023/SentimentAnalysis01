@@ -8,73 +8,58 @@ import os
 from nltk.corpus import stopwords
 from nltk.sentiment.vader import SentimentIntensityAnalyzer
 from nltk.stem import WordNetLemmatizer
-from nltk.tokenize import word_tokenize
+from nltk.tokenize import word_tokenize, wordpunct_tokenize
 
-# Explicitly set the matplotlib backend for Streamlit
+# Explicitly set matplotlib backend
 import matplotlib
 matplotlib.use('Agg')
 
-# Custom NLTK data directory for compatibility with Streamlit Cloud or other environments
+# Custom NLTK data directory
 nltk_data_dir = os.path.join(os.getcwd(), "nltk_data")
-
-# Create the directory if it doesn't exist
 if not os.path.exists(nltk_data_dir):
     os.makedirs(nltk_data_dir)
 
-# Set NLTK data path
 nltk.data.path.append(nltk_data_dir)
 
-# Ensure the necessary NLTK resources are downloaded
+# Force download necessary resources
 def download_nltk_resources():
-    try:
-        # Check if punkt tokenizer is downloaded
-        nltk.data.find('tokenizers/punkt')
-    except LookupError:
-        nltk.download('punkt', download_dir=nltk_data_dir)
+    resources = {
+        'punkt': 'tokenizers/punkt',
+        'stopwords': 'corpora/stopwords',
+        'vader_lexicon': 'sentiment/vader_lexicon',
+        'wordnet': 'corpora/wordnet'
+    }
+    for resource, path in resources.items():
+        try:
+            nltk.data.find(path)
+        except LookupError:
+            nltk.download(resource, download_dir=nltk_data_dir, force=True)
 
-    try:
-        # Check if stopwords are downloaded
-        nltk.data.find('corpora/stopwords')
-    except LookupError:
-        nltk.download('stopwords', download_dir=nltk_data_dir)
-
-    try:
-        # Check if vader lexicon is downloaded
-        nltk.data.find('vader_lexicon')
-    except LookupError:
-        nltk.download('vader_lexicon', download_dir=nltk_data_dir)
-
-    try:
-        # Check if wordnet is downloaded
-        nltk.data.find('corpora/wordnet')
-    except LookupError:
-        nltk.download('wordnet', download_dir=nltk_data_dir)
-
-# Call the function to ensure resources are available
+# Call to ensure resources
 download_nltk_resources()
 
-# Load stopwords once
+# Load stopwords
 try:
     stop_words = set(stopwords.words('english'))
 except LookupError:
-    st.error("Failed to load NLTK stopwords. Ensure the stopwords resource is downloaded.")
+    st.error("Failed to load NLTK stopwords.")
 
-# Function to process text
+# Text processing function
 def process_text(text):
     try:
-        # Convert text to lowercase and remove punctuation
+        # Lowercase & remove punctuation
         lower_case = text.lower()
         cleaned_text = lower_case.translate(str.maketrans('', '', string.punctuation))
 
-        # Tokenize words
-        tokenized_words = word_tokenize(cleaned_text)
+        # Tokenize words using safer tokenizer
+        tokenized_words = wordpunct_tokenize(cleaned_text)
 
-        # Remove stopwords and lemmatize words
+        # Remove stopwords & lemmatize
         lemmatizer = WordNetLemmatizer()
         final_words = [word for word in tokenized_words if word not in stop_words]
         lemma_words = [lemmatizer.lemmatize(word) for word in final_words]
 
-        # Extract emotions from emotions.txt file
+        # Emotion detection
         file_path = os.path.join(os.path.dirname(__file__), 'emotions.txt')
         emotion_list = []
         if os.path.exists(file_path):
@@ -88,7 +73,7 @@ def process_text(text):
             st.error("emotions.txt file not found!")
             return None, None
 
-        # Count emotion occurrences
+        # Count emotions
         emotion_counter = Counter(emotion_list)
 
         # Sentiment analysis
@@ -103,30 +88,31 @@ def process_text(text):
         return emotion_counter, sentiment
 
     except Exception as e:
-        st.error(f"An error occurred while processing the text: {e}")
+        st.error(f"An error occurred: {e}")
         return None, None
-
 
 # Streamlit UI
 st.title("Text Emotion & Sentiment Analyzer")
 
-# File uploader for text file
+# File uploader
 uploaded_file = st.file_uploader("Upload a .txt file", type=["txt"])
 
-# If a file is uploaded, process it
+# Manual re-download button for debugging
+if st.button("Force Redownload NLTK Resources"):
+    download_nltk_resources()
+    st.success("Redownloaded NLTK resources.")
+
+# Process uploaded text
 if uploaded_file is not None:
     try:
-        # Read and decode the uploaded file
         text = uploaded_file.read().decode("utf-8")
     except UnicodeDecodeError:
         st.error("Please upload a UTF-8 encoded text file.")
         text = ""
 
     if text:
-        # Process the uploaded text
         emotions, sentiment = process_text(text)
 
-        # If the emotions and sentiment are successfully processed
         if emotions and sentiment:
             st.subheader("Sentiment:")
             st.write(sentiment)
@@ -134,7 +120,7 @@ if uploaded_file is not None:
             st.subheader("Emotions Detected:")
             st.write(dict(emotions))
 
-            # Plotting the emotions
+            # Plot
             if emotions:
                 fig, ax = plt.subplots()
                 ax.bar(emotions.keys(), emotions.values(), color='skyblue')
